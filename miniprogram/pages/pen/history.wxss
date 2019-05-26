@@ -1,0 +1,17 @@
+.grid-image {
+  background-color:yellow;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.time {
+  background-color: red;
+}
+
+.modal-image {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  height: 400px;
+}

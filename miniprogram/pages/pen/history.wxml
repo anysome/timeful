@@ -1,0 +1,42 @@
+<wxs src="../../filter/filter.wxs" module="filter" />
+<cu-custom bgColor="bg-gradual-blue">
+  <view slot="content">待办清单</view>
+  <view class="action padding-left" slot="right">
+    <view class="cu-load load-icon {{loading?'loading':'over'}}"></view>
+  </view>
+</cu-custom>
+
+<view class="bg-white padding">
+  <view class="grid col-3 grid-square">
+    <view class="bg-img bg-mask grid-image" wx:for="{{lists}}" wx:key style="background-image:url({{item.image}});" data-index='{{index}}' bindtap='showModal'>
+      <view class='padding text-white'>
+        {{filter.formatDateShort(item.date)}}
+      </view>
+      <view class='padding'></view>
+      <view class='padding text-white text-right'>
+        {{filter.formatTimeShort(item.date)}}
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="cu-modal {{modalOpened?'show':''}}">
+  <view class="cu-dialog">
+    <view class="bg-img modal-image" style="background-image: url('{{lists[currentIndex].image}}');">
+      <view class="cu-bar justify-end text-white">
+        <view class='action' bindtap='hideModal'>
+          <text class='cuIcon-close'></text>
+        </view>
+      </view>
+    </view>
+    <view class="cu-bar bg-white">
+      <view class='action margin-0 flex-sub text-red' bindtap='deleteTodoList'>
+        <text class='cuIcon-delete'> 删除</text>
+      </view>
+      <view class='action margin-0 flex-sub solid-left' bindtap='hideModal'>取消</view>
+      <view class='action margin-0 flex-sub text-green solid-left' bindtap='openTodoList'>
+        <text class='cuIcon-post'> 打开</text>
+      </view>
+    </view>
+  </view>
+</view>

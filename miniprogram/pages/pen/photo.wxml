@@ -1,0 +1,19 @@
+<cu-custom bgColor="bg-gradual-blue" isBack>
+  <view slot="backText">返回</view>
+  <view slot="content">拍取纸上待办</view>
+</cu-custom>
+
+<view id='canvasArea' class="canvas_area margin-top-xl">
+  <canvas canvas-id="backCanvas" class="myCanvas" style='height: {{canvasHeight}}px'  disable-scroll hidden />
+  <canvas canvas-id="foreCanvas" class="myCanvas" style='height: {{canvasHeight}}px' disable-scroll />
+</view>
+
+<view class='footer'>
+  <view class='bottom cu-bar tabbar'>
+    <button class='cu-btn lg round bg-red' bindtap='dismiss'>放弃</button>
+    <button class='cu-btn lg round bg-white' bindtap='chooseImg'>重拍</button>
+    <button class='cu-btn lg round bg-blue' bindtap='done' disabled='{{!hasChoosedImg}}'>选定</button>
+  </view>
+  <slider min='10' max='90' value='50' bindchange='updateImage'></slider>
+</view>
+

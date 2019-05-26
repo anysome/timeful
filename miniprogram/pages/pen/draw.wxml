@@ -1,0 +1,46 @@
+<cu-custom bgColor="bg-gradual-blue" isCustom showBack="{{false}}">
+  <view slot="content">神笔时间</view>
+</cu-custom>
+
+<view class="canvas_area">
+  <image class="bgImage" src="{{listImage}}" style="height: {{canvasHeight}}px;"/>
+  <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" bindtouchstart="touchStart" bindtouchmove="touchMove" style="height: {{canvasHeight}}px;" />
+</view>
+
+<view id='tabbar' class="cu-bar tabbar bg-white shadow foot bottom">
+  <button class="operation cu-btn lg bg-white" open-type="share">
+    <text class="cuIcon-share lg text-grey"></text>
+  </button>
+  <view class="operation"></view>
+  <view class="operation cu-btn lg round" style="background: {{canDraw ? penColor : '#ccc'}}" bindtap="toggleDraw" bindlongpress='openSettingPen'>
+    <text class="cuIcon-write lg text-white"></text>
+  </view>
+
+  <view class="operation cu-btn lg round bg-disabled" wx:if="{{isClean}}">
+    <text class="cuIcon-repeal lg text-white"></text>
+  </view>
+  <view class="operation cu-btn lg round bg-blue" bindtap="drawBack" bindlongpress='clearCanvas' wx:else>
+    <text class="cuIcon-repeal lg text-white"></text>
+  </view>
+
+  <view class="operation"></view>
+  <view class="operation cu-btn lg bg-white" bindtap='goto' data-page='./photo'>
+    <text class="cuIcon-camera lg text-blue"></text>
+  </view>
+</view>
+
+<cover-view class='panel bg-gray' style='bottom: {{tabbarHeight}}px' wx:if="{{penSetting}}">
+  <cover-view class="panel-box">
+    <cover-view bindtap="selectColor" class="color-spot bg-green" data-color="#39b54a" />
+    <cover-view bindtap="selectColor" class="color-spot bg-orange" data-color="#f37b1d" />
+  </cover-view>
+  <cover-view class="panel-box">
+    <cover-view class='bg-white btn-width' data-diff='2' bindtap='reduceWidth'>
+      <cover-view>-</cover-view>
+    </cover-view>
+    <cover-view class="color-bar" style="background: {{penColor}}; height: {{penWidth}}px; border-radius: {{penWidth/2}}px" />
+    <cover-view class='bg-white btn-width' data-diff='2' bindtap='addWidth'>
+      <cover-view>+</cover-view>
+    </cover-view>
+  </cover-view>
+</cover-view>

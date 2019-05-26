@@ -1,0 +1,17 @@
+<pen wx:if="{{tab=='pen'}}"></pen>
+<setting wx:if="{{tab=='setting'}}"></setting>
+
+<view class="cu-bar tabbar bg-white shadow foot">
+  <view class="action" bindtap="tabClick" data-cur="pen">
+    <view class="cuIcon-time {{tab=='pen'?'text-blue':'text-gray'}}"></view>
+    <view class="{{tab=='pen'?'text-blue':'text-gray'}}">清单</view>
+  </view>
+  <view class="action text-gray add-action" bindtap='toDraw'>
+    <button class="cu-btn cuIcon-write bg-blue shadow"></button>
+    神笔
+  </view>
+  <view class="action" bindtap="tabClick" data-cur="setting">
+    <view class="cuIcon-settings {{tab=='setting'?'text-blue':'text-gray'}}"></view>
+    <view class="{{tab=='setting'?'text-blue':'text-gray'}}">设置</view>
+  </view>
+</view>

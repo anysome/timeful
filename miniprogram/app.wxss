@@ -1,0 +1,6 @@
+@import "colorui/main.wxss";
+@import "colorui/icon.wxss";
+
+.scroll-page {
+  height: 100vh;
+}

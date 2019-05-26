@@ -1,0 +1,31 @@
+var formatNumber = function (n) {
+  n = n.toString()
+  return n[1] ? n : '0' + n
+}
+
+var formatDateShort = function (val) {
+  if (val) {
+    var myDate = getDate(val)
+    var month = myDate.getMonth() + 1
+    var day = myDate.getDate()
+    return formatNumber(month) + '-' + formatNumber(day)
+  } else {
+    return ''
+  }
+}
+
+var formatTimeShort = function (val) {
+  if (val) {
+    var myDate = getDate(val)
+    var hour = myDate.getHours()
+    var minute = myDate.getMinutes()
+    return formatNumber(hour) + ':' + formatNumber(minute)
+  } else {
+    return ''
+  }
+}
+
+module.exports = {
+  formatDateShort: formatDateShort,
+  formatTimeShort: formatTimeShort
+}
