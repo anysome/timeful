@@ -8,11 +8,16 @@ exports.main = async (event, context) => {
   })
   const db = cloud.database()
 
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+
   let { offset, size } = event
   offset = offset || 0
   size = size || 50
 
-  let res = await db.collection('todoList').skip(offset).limit(size).orderBy('date', 'desc').get()
+  let res = await db.collection('todoList').where({
+    _openid: openid
+  }).skip(offset).limit(size).orderBy('date', 'desc').get()
   console.log('list query res: ', res)
 
   const lists = res.data
