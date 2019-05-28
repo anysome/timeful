@@ -1,5 +1,5 @@
-import { setPoints, reDraw, getPoints, recordPointsFun, startTouch, drawBack, clearDraw, getPenSetting, savePenSetting } from "../../utils/paint";
-import { initEnv, getDefaultTodoList, createTodoList, cacheOriginalImage, getOrignalImage, updateTodoListPoints } from "../../utils/cloud";
+import { setPoints, reDraw, getPoints, recordPoints, startTouch, drawBack, clearDraw, getPenSetting, savePenSetting } from "../../utils/paint";
+import { getDefaultTodoList, createTodoList, cacheOriginalImage, getOrignalImage, updateTodoListPoints } from "../../utils/cloud";
 
 const app = getApp();
 
@@ -13,8 +13,6 @@ Page({
     penColor: '#39b54a',
     penWidth: 12,
     penSetting: false, // 是否开启画笔调整栏
-    saving: false, // 是否在保存状态
-    scope: false, // 是否有保存图片的权限
   },
 
   todoList: {},
@@ -25,20 +23,17 @@ Page({
   movePosition: [0, 0], // 当前移动位置
 
   onLoad: function (options) {
-    initEnv();
-    let that = this;
-    // 获取设备信息，canvas高度用
-    wx.getSystemInfo({
-      success: function (res) {
-        app.globalData.systemInfo = res
-        console.log("sys info %o", app.globalData.systemInfo);
-        that.canvasWidth = res.windowWidth;
-        that.setData({
-          canvasHeight: res.windowHeight - 100
-        })
-        that.maxHeight = res.windowHeight - 100
-      },
-    })
+    // 调整画布
+    if (app.globalData.systemInfo) {
+      this.initCanvasRect(app.globalData.systemInfo)
+    } else {
+      const that = this
+      wx.getSystemInfo({
+        success: function (res) {
+          that.initCanvasRect(res)
+        }
+      })
+    }
     // 监听新图片选择后的返回处理
     app.event.on('newImage', (filePath) => {
       wx.showLoading({
@@ -63,6 +58,14 @@ Page({
     app.event.on('openList', (list) => {
       this.openList(list)
     })
+  },
+
+  initCanvasRect(systemInfo) {
+    this.canvasWidth = systemInfo.windowWidth;
+    this.setData({
+      canvasHeight: systemInfo.windowHeight - 100
+    })
+    this.maxHeight = systemInfo.windowHeight - 100
   },
 
   openList(list) {
@@ -102,14 +105,6 @@ Page({
       penSetting: true,
       canDraw: true,
     });
-  },
-
-  savePhoto: function (e) {
-    // utils.savePhoto(this);
-  },
-
-  addImg: function (e) {
-    this.chooseImg();
   },
 
   setupImage(newImage) {
@@ -171,7 +166,7 @@ Page({
     ctx.stroke();
     ctx.draw(true);
 
-    recordPointsFun(this.movePosition, drawPosition)
+    recordPoints(this.movePosition, drawPosition)
 
     this.prevPosition = [cX, cY];
     this.movePosition = [(cX + pX) / 2, (cY + pY) / 2];
@@ -234,14 +229,14 @@ Page({
     });
   },
 
-  goto: function (e) {
+  takePhoto: function () {
     wx.navigateTo({
-      url: e.currentTarget.dataset.page,
+      url: './photo'
     });
   },
 
   onReady: function () {
-    // 调整控制面板的底部位置
+    // 设置弹出控制面板的底部位置
     setTimeout(() => {
       const that = this
       wx.createSelectorQuery().select('#tabbar')
@@ -253,14 +248,12 @@ Page({
     }, 500);
     // 设置画笔
     const pen = getPenSetting();
-    console.log('read pen setting: %o', pen);
     this.penAlpha = pen.alpha;
     this.setData({
       canDraw: pen.enable,
       penColor: pen.color,
       penWidth: pen.width
     });
-    // 
     // 加载指定数据，或者，还原最近的记录
     const list = app.globalData.pageParam
     if (list) {
@@ -289,6 +282,7 @@ Page({
   },
 
   onHide: function () {
+    // 保存数据
     if (this.todoList._id) {
       let points = getPoints();
       this.todoList.points = points
@@ -301,9 +295,6 @@ Page({
     });
   },
 
-  /**
-   * 用户点击右上角分享
-   */
   onShareAppMessage: function () {
 
   }

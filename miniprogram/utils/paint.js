@@ -1,16 +1,16 @@
-let recordPoints = [];
+let _points = [];
 
-export const setPoints = (points) => {
-  recordPoints = points;
+const setPoints = (points) => {
+  _points = points;
 }
 
-export const getPoints = () => {
-  return recordPoints;
+const getPoints = () => {
+  return _points;
 }
 
 // 记录一条线的起始点，顺便记录一下这条线的颜色和为宽度
-export const startTouch = (e, color, width) => {
-  recordPoints.push([{
+const startTouch = (e, color, width) => {
+  _points.push([{
     x: e.touches[0].x,
     y: e.touches[0].y,
     color,
@@ -19,21 +19,22 @@ export const startTouch = (e, color, width) => {
 };
 
 // 记录一条线内的每个点
-export const recordPointsFun = (move, draw) => {
-  const l = recordPoints.length;
-  recordPoints[l-1].push({ move, draw });
+const recordPoints = (move, draw) => {
+  const l = _points.length;
+  _points[l-1].push({ move, draw });
 };
 
-// 绘制过程
-export const reDraw = (_this) => {
-  if (recordPoints.length == 0) {
+// 还原笔迹
+const reDraw = (_this) => {
+  console.log('try to redraw: %o', _points)
+  if (_points.length == 0) {
     clearDraw(_this);
     return;
   }
 
   const ctx = wx.createCanvasContext('myCanvas');
   ctx.setGlobalAlpha(_this.penAlpha);
-  recordPoints.forEach(line => {
+  _points.forEach(line => {
     const { width, color, x, y } = line[0];
     // 线的宽度
     ctx.setLineWidth(width);
@@ -62,27 +63,20 @@ export const reDraw = (_this) => {
 };
 
 // 后退
-export const drawBack = (_this) => {
-  recordPoints.pop();
+const drawBack = (_this) => {
+  _points.pop();
   reDraw(_this, _this.penAlpha);
 };
 
-// 清空globalData里的点数据
-export const clearDraw = (_this) => {
-  recordPoints.length = 0;
+// 清空所有笔迹
+const clearDraw = (_this) => {
+  _points.length = 0;
   let ctx = wx.createCanvasContext('myCanvas');
   ctx.clearRect(0, 0, _this.canvasWidth, _this.data.canvasHeight);
   ctx.draw();
 };
 
-export const eraseDraw = (e, _this) => {
-  const ctx = wx.createCanvasContext('myCanvas');
-  const { x, y } = e.touches[0];
-  ctx.clearRect(x, y, 20, 20);
-  ctx.draw();
-}
-
-export const getPenSetting = () => {
+const getPenSetting = () => {
   try {
     const res = wx.getStorageSync('pen_setting');
     if (res) {
@@ -99,7 +93,7 @@ export const getPenSetting = () => {
   };
 }
 
-export const savePenSetting = (setting) => {
+const savePenSetting = (setting) => {
   let pen = getPenSetting();
   setting.color && (pen.color = setting.color);
   setting.width && (pen.width = setting.width);
@@ -112,4 +106,16 @@ export const savePenSetting = (setting) => {
     key: 'pen_setting',
     data: pen
   })
+}
+
+export {
+  setPoints,
+  getPoints,
+  startTouch,
+  recordPoints,
+  reDraw,
+  drawBack,
+  clearDraw,
+  getPenSetting,
+  savePenSetting
 }

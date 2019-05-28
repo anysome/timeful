@@ -81,7 +81,10 @@ Page({
           height: res.height,
           data,
           success(res) {
-            console.log("update image gray");
+            console.log("update image gray")
+          },
+          fail(err) {
+            console.log("update image gray error.", err)
           }
         })
       }

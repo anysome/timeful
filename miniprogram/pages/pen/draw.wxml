@@ -24,7 +24,7 @@
   </view>
 
   <view class="operation"></view>
-  <view class="operation cu-btn lg bg-white" bindtap='goto' data-page='./photo'>
+  <view class="operation cu-btn lg bg-white" bindtap='takePhoto'>
     <text class="cuIcon-camera lg text-blue"></text>
   </view>
 </view>

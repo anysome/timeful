@@ -1,4 +1,4 @@
-import { connect, extract } from '../../mobx/mobx-wxapp'
+import { connect } from '../../mobx/mobx-wxapp'
 import store from '../../mobx/list-store'
 
 const app = getApp();
