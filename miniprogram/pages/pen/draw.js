@@ -1,6 +1,9 @@
 import { setPoints, reDraw, getPoints, recordPoints, startTouch, drawBack, clearDraw, getPenSetting, savePenSetting } from "../../utils/paint";
 import { getDefaultTodoList, createTodoList, cacheOriginalImage, getOrignalImage, updateTodoListPoints } from "../../utils/cloud";
 
+import store from '../../mobx/list-store'
+import { updateCachedTodoList } from '../../utils/cache.js'
+
 const app = getApp();
 
 Page({
@@ -34,29 +37,40 @@ Page({
         }
       })
     }
-    // 监听新图片选择后的返回处理
-    app.event.on('newImage', (filePath) => {
+    // 监听图片选择后，创建新记录
+    app.event.on('image:take', data => {
+      const that = this
       wx.showLoading({
         title: '加载中...',
-      });
-      createTodoList(filePath, record => {
-        wx.hideLoading()
-        console.log('reload record.', record)
-        this.todoList = record
-        this.resetPoints()
-        cacheOriginalImage(filePath, file => {
-          this.setupImage(file)
-        })
-      }, err => {
-        wx.showToast({
-          title: '保存文件失败, 请重试～',
-          icon: 'none'
-        })
+      })
+      store.addList({
+        data: data,
+        success: (record) => {
+          wx.hideLoading()
+          console.log('create new todolist: ', record)
+          updateCachedTodoList(record)
+          that.todoList = record
+          that.resetPoints()
+          that.setupImage(data.image)
+        },
+        fail: err => {
+          wx.hideLoading()
+          wx.showToast({
+            title: '保存数据出错了, 请重试～',
+            icon: 'none'
+          })
+        }
       })
     })
     // 监听旧记录选择后的返回处理
-    app.event.on('openList', (list) => {
+    app.event.on('todolist:open', (list) => {
       this.openList(list)
+    })
+    // 判断当前记录是否被删除了
+    app.event.on('todolist:remove', (listId) => {
+      if (this.todoList._id === listId) {
+        this.todoList = {}
+      }
     })
   },
 
@@ -83,8 +97,9 @@ Page({
   },
 
   onUnload: function () {
-    app.event.off('newImage')
-    app.event.off('openList')
+    app.event.off('image:take')
+    app.event.off('todolist:open')
+    app.event.off('todolist:remove')
   },
 
   toggleDraw: function () {
@@ -296,6 +311,8 @@ Page({
   },
 
   onShareAppMessage: function () {
-
+    return {
+      title: '我的清单'
+    }
   }
 })

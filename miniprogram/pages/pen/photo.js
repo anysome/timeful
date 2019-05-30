@@ -1,3 +1,5 @@
+import { uploadTodoListImage } from '../../utils/cache.js'
+
 const app = getApp();
 
 Page({
@@ -55,7 +57,6 @@ Page({
   },
 
   updateGray: function (threshold) {
-    console.log("threshold = " + threshold);
     wx.canvasGetImageData({
       canvasId: 'backCanvas',
       x: 0,
@@ -67,11 +68,9 @@ Page({
         for (var i = 0; i < data.length; i += 4) {
           // 灰度计算公式
           var gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          // var alpha = data[i + 3];
           data[i] = gray >= threshold ? 250 : 3;                         // red
           data[i + 1] = gray >= threshold ? 218 : 49;                    // green
           data[i + 2] = gray >= threshold ? 141 : 79;                    // blue
-          // data[i + 3] = alpha >= threshold ? 255 : 0;                    // alpha
         }
         wx.canvasPutImageData({
           canvasId: 'foreCanvas',
@@ -131,19 +130,35 @@ Page({
     wx.canvasToTempFilePath({
       canvasId: 'foreCanvas',
       success: function (res) {
-        wx.hideLoading();
-        // 转图片成功，返回给首页
-        app.event.emit('newImage', res.tempFilePath);
-        wx.navigateBack({
-          delta: 1
-        });
+        // 上传图片
+        uploadTodoListImage({
+          filePath: res.tempFilePath,
+          success: fileID => {
+            wx.hideLoading()
+            // 转图片成功，返回给首页
+            app.event.emit('image:take', {
+              fileID,
+              image: res.tempFilePath
+            });
+            wx.navigateBack({
+              delta: 1
+            });
+          },
+          fail: err => {
+            wx.hideLoading()
+            wx.showToast({
+              icon: 'none',
+              title: '保存图片出错了，请重试～',
+            })
+          }
+        })
       },
       fail: function (res) {
-        wx.hideLoading();
+        wx.hideLoading()
         // canvas转图片失败
         wx.showToast({
-          icon: 'loading',
-          title: '保存失败',
+          icon: 'none',
+          title: '保存图片出错了，请重试～',
         })
       }
     });

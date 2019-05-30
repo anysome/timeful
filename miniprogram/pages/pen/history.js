@@ -72,7 +72,7 @@ Component({
       // 返回当前记录给首页
       const todoList = this.data.lists[this.data.currentIndex]
       if ( getCurrentPages().length > 1) {
-        app.event.emit('openList', todoList);
+        app.event.emit('todolist:open', todoList);
         wx.navigateBack({
           delta: 1
         });

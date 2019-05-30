@@ -1,14 +1,20 @@
 import { observable } from './mobx'
 
+const app = getApp()
+
 const store = observable({
 
   // observable
   lists: [],
   listsLoading: false,
+  currentIndex: -1,
 
   // computed
-  get count() {
-    return this.lists.length
+  get current() {
+    if ( currentIndex === -1) {
+      return null
+    }
+    return this.lists[currentIndex]
   },
 
   // actions
@@ -39,8 +45,29 @@ const store = observable({
     })
   },
 
+  addList(options) {
+    const { data } = options
+    const that = this
+    wx.cloud.callFunction({
+      name: 'list-create',
+      data: { fileID: data.fileID },
+      success: res => {
+        res.result.image = data.image
+        that.lists.unshift(res.result)
+        that.currentIndex = 0
+        options.success && options.success(res.result)
+      },
+      fail: err => {
+        console.log('[云函数] 创建 list 失败.', err)
+        options.fail && options.fail(err)
+      }
+    })
+  },
+
   deleteList(options) {
     const record = this.lists[options.index]
+    const removedId = record._id
+    app.event.emit('todolist:remove', removeId)
     const that = this
     let lists = this.lists
     wx.cloud.callFunction({
