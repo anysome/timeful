@@ -8,6 +8,7 @@ const store = observable({
   lists: [],
   listsLoading: false,
   currentIndex: -1,
+  remoteLoaded: false,
 
   // computed
   get current() {
@@ -19,8 +20,8 @@ const store = observable({
 
   // actions
   checkAndLoad() {
-    if (this.lists.length === 0) {
-      this.loadLists()
+    if (!this.remoteLoaded) {
+      this.loadLists({})
     }
   },
 
@@ -37,6 +38,7 @@ const store = observable({
         console.log('get lists form cloud', res.result)
         that.lists = that.lists.concat(res.result)
         that.listsLoading = false
+        that.remoteLoaded = true
       },
       fail: err => {
         console.log('[云函数] 获取 lists 失败.', err)

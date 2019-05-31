@@ -9,7 +9,22 @@ Component({
   },
 
   methods: {
-    CopyLink(e) {
+    openApp(e) {
+      wx.navigateToMiniProgram({
+        appId: e.currentTarget.dataset.appid,
+        success(res) {
+          console.log('nav to other app.', res)
+        },
+        fail(err) {
+          console.log('nav to app error: ', err)
+          wx.showToast({
+            title: '抱歉无法打开小程序',
+            icon: 'none'
+          })
+        }
+      })
+    },
+    copyLink(e) {
       wx.setClipboardData({
         data: e.currentTarget.dataset.link,
         success: res => {
