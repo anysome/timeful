@@ -1,8 +1,6 @@
-import { setPoints, reDraw, getPoints, recordPoints, startTouch, drawBack, clearDraw, getPenSetting, savePenSetting } from "../../utils/paint";
-import { createTodoList, cacheOriginalImage, getOrignalImage, updateTodoListPoints } from "../../utils/cloud";
-
-import store from '../../mobx/list-store'
+import painter from '../../utils/painter.js'
 import { updateCachedTodoList, getDefaultTodoList } from '../../utils/cache.js'
+import store from '../../mobx/list-store'
 
 const app = getApp();
 
@@ -61,7 +59,7 @@ Page({
       title: '加载中...',
     })
     const that = this
-    store.addList({
+    store.createList({
       data: images,
       success: (record) => {
         wx.hideLoading()
@@ -139,7 +137,7 @@ Page({
         });
         // 重新绘制笔迹
         setTimeout(() => {
-          reDraw(that);
+          painter.reDraw(that);
         }, 500);
       }
     });
@@ -157,7 +155,7 @@ Page({
         isClean: false
       });
     const { penColor, penWidth } = this.data;
-    startTouch(e, penColor, penWidth);
+    painter.startTouch(e, penColor, penWidth);
   },
 
   touchMove: function (e) {
@@ -181,7 +179,7 @@ Page({
     ctx.stroke();
     ctx.draw(true);
 
-    recordPoints(this.movePosition, drawPosition)
+    painter.recordPoints(this.movePosition, drawPosition)
 
     this.prevPosition = [cX, cY];
     this.movePosition = [(cX + pX) / 2, (cY + pY) / 2];
@@ -195,7 +193,7 @@ Page({
       confirmColor: '#e54d42',
       success: function (res) {
         if (res.confirm) {
-          clearDraw(that);
+          painter.clearDraw(that);
           that.setData({ isClean: true })
         }
       }
@@ -205,8 +203,8 @@ Page({
   drawBack() {
     const ctx = wx.createCanvasContext('myCanvas');
     ctx.draw();
-    drawBack(this);
-    if (getPoints().length === 0) {
+    painter.drawBack(this);
+    if (painter.getPoints().length === 0) {
       this.setData({ isClean: true })
     }
   },
@@ -262,13 +260,33 @@ Page({
         }).exec();
     }, 500);
     // 设置画笔
-    const pen = getPenSetting();
+    const pen = painter.getPenSetting();
     this.penAlpha = pen.alpha;
     this.setData({
       canDraw: pen.enable,
       penColor: pen.color,
       penWidth: pen.width
     });
+    // 初次使用，弹出操作提示
+    if (!wx.getStorageSync('tips-already')) {
+      wx.showModal({
+        title: '操作提示',
+        content: '长按画笔按钮可更改画笔颜色',
+        confirmColor: '#39b54a',
+        confirmText: '下一条',
+        success: function (res) {
+          wx.showModal({
+            title: '操作提示',
+            content: '长按撤销按钮可清空笔迹',
+            confirmColor: '#39b54a',
+          })
+        }
+      })
+      wx.setStorage({
+        key: 'tips-already',
+        data: '1',
+      })
+    }
     // 加载指定数据，或者，还原最近的记录
     const list = app.globalData.pageParam
     if (list) {
@@ -286,22 +304,6 @@ Page({
         },
         empty: () => {
           wx.hideLoading()
-          // 操作提示
-          wx.showModal({
-            title: '操作提示',
-            content: '长按画笔按钮可更改画笔颜色',
-            confirmColor: '#39b54a',
-            confirmText: '下一条',
-            success: function (res) {
-              wx.showModal({
-                title: '操作提示',
-                content: '长按撤销按钮可清空笔迹',
-                confirmColor: '#39b54a',
-              })
-            }
-          })
-          // 创建默认的记录
-          // TODO
         }
       })
     }
@@ -309,13 +311,13 @@ Page({
 
   resetPoints: function () {
     setTimeout(() => {
-      clearDraw(this);
+      painter.clearDraw(this);
       this.setData({ isClean: true })
     }, 150);
     if (this.todoList.points && this.todoList.points.length > 0) {
       setTimeout(() => {
         this.setData({ isClean: false })
-        setPoints(this.todoList.points);
+        painter.setPoints(this.todoList.points);
       }, 150)
     }
   },
@@ -324,14 +326,14 @@ Page({
     // 保存数据
     console.log('hide todolist: ', this.todoList)
     if (this.todoList._id) {
-      let points = getPoints();
+      let points = painter.getPoints();
       store.updateListPoints({
         list: this.todoList,
         points,
         success: updateCachedTodoList
       })
     }
-    savePenSetting({
+    painter.savePenSetting({
       color: this.data.penColor,
       width: this.data.penWidth,
       enable: this.data.canDraw

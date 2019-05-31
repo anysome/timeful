@@ -47,7 +47,7 @@ const store = observable({
     })
   },
 
-  addList(options) {
+  createList(options) {
     const { data } = options
     const that = this
     wx.cloud.callFunction({

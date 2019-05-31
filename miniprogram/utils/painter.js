@@ -108,7 +108,7 @@ const savePenSetting = (setting) => {
   })
 }
 
-export {
+export default {
   setPoints,
   getPoints,
   startTouch,
