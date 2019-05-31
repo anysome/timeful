@@ -143,6 +143,23 @@ Page({
     });
   },
 
+  reloadImage() {
+    const fileID = this.todoList.originFileID
+    if (!fileID) {
+      return
+    }
+    const that = this
+    wx.cloud.getTempFileURL({
+      fileList: [fileID],
+      success: res => {
+        console.log('temp url:', res)
+        if (res.fileList.length > 0) {
+          that.setupImage(res.fileList[0].tempFileURL)
+        }
+      }
+    })
+  },
+
   touchStart: function (e) {
     if (!this.data.canDraw) {
       return;

@@ -6,6 +6,8 @@
   </view>
 </cu-custom>
 
+<view class="cu-load padding-top bg-white loading" wx:if="{{lists.length==0&&loading}}"></view>
+
 <view class="bg-white padding">
   <view class="grid col-3 grid-square">
     <view class="bg-img bg-mask grid-image" wx:for="{{lists}}" wx:key style="background-image:url({{item.image}});" data-index='{{index}}' bindtap='showModal'>
