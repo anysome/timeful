@@ -1,13 +1,14 @@
-import painter from '../../utils/painter.js'
+import Painter from '../../utils/painter.js'
 import { updateCachedTodoList, getDefaultTodoList } from '../../utils/cache.js'
 import store from '../../mobx/list-store'
 
-const app = getApp();
+const app = getApp()
 
 Page({
   data: {
     tabbarHeight: 42,
     canvasHeight: 0,
+    currentCanvasId: 'myCanvas',
     todoListImage: '../../images/bg-temp.jpg',
     canDraw: true,
     isClean: true,
@@ -16,6 +17,9 @@ Page({
     penSetting: false, // 是否开启画笔调整栏
   },
 
+  painter: {},
+  painter1: new Painter('myCanvas'),
+  painter2: new Painter('myCanvas2'),
   todoList: {},
   canvasWidth: 320,
   maxHeight: 480,
@@ -24,6 +28,8 @@ Page({
   movePosition: [0, 0], // 当前移动位置
 
   onLoad: function (options) {
+
+    this.painter = this.painter1
     // 调整画布
     if (app.globalData.systemInfo) {
       this.initCanvasRect(app.globalData.systemInfo)
@@ -65,9 +71,7 @@ Page({
         wx.hideLoading()
         console.log('create new todolist: ', record)
         updateCachedTodoList(record)
-        that.todoList = record
-        that.resetPoints()
-        that.setupImage(images.image)
+        that.openList(record)
       },
       fail: err => {
         wx.hideLoading()
@@ -81,8 +85,28 @@ Page({
 
   openList(list) {
     console.log("will show old list: %o", list)
+    if (this.data.currentCanvasId == 'myCanvas') {
+      this.setData({
+        currentCanvasId: 'myCanvas2'
+      })
+      setTimeout(() => {
+        this.painter1.clearDraw(this)
+      }, 1500)
+      this.setData({ isClean: true })
+      this.painter = this.painter2
+      console.log('change to painter 2')
+    } else {
+      this.setData({
+        currentCanvasId: 'myCanvas'
+      })
+      setTimeout(() => {
+        this.painter2.clearDraw(this)
+      }, 1500)
+      this.setData({ isClean: true })
+      this.painter = this.painter1
+      console.log('change to painter 1')
+    }
     this.todoList = list
-    this.resetPoints()
     this.setupImage(list.image)
   },
 
@@ -133,12 +157,14 @@ Page({
         }
         that.setData({
           todoListImage: newImage,
-          canvasHeight: height
+          canvasHeight: height,
+          isClean: !(that.todoList.points && that.todoList.points.length > 0)
         });
         // 重新绘制笔迹
         setTimeout(() => {
-          painter.reDraw(that);
-        }, 500);
+          that.painter.setPoints(that.todoList.points)
+          that.painter.reDraw(that)
+        }, 600);
       }
     });
   },
@@ -162,44 +188,44 @@ Page({
 
   touchStart: function (e) {
     if (!this.data.canDraw) {
-      return;
+      return
     }
     // 开始画图，隐藏所有的操作栏
     this.prevPosition = [e.touches[0].x, e.touches[0].y];
     this.movePosition = [e.touches[0].x, e.touches[0].y],
-      this.setData({
-        penSetting: false,
-        isClean: false
-      });
-    const { penColor, penWidth } = this.data;
-    painter.startTouch(e, penColor, penWidth);
+    this.setData({
+      penSetting: false,
+      isClean: false
+    })
+    const { penColor, penWidth } = this.data
+    this.painter.startTouch(e, penColor, penWidth)
   },
 
   touchMove: function (e) {
     if (!this.data.canDraw) {
-      return;
+      return
     }
-    const { penColor, penWidth } = this.data;
+    const { penColor, penWidth } = this.data
     // 触摸，绘制中。。
-    const ctx = wx.createCanvasContext('myCanvas');
-    ctx.setGlobalAlpha(this.penAlpha);
+    const ctx = wx.createCanvasContext(this.data.currentCanvasId)
+    ctx.setGlobalAlpha(this.penAlpha)
 
-    const [pX, pY, cX, cY] = [...this.prevPosition, e.touches[0].x, e.touches[0].y];
-    const drawPosition = [pX, pY, (cX + pX) / 2, (cY + pY) / 2];
-    ctx.setLineWidth(penWidth);
-    ctx.setStrokeStyle(penColor);
+    const [pX, pY, cX, cY] = [...this.prevPosition, e.touches[0].x, e.touches[0].y]
+    const drawPosition = [pX, pY, (cX + pX) / 2, (cY + pY) / 2]
+    ctx.setLineWidth(penWidth)
+    ctx.setStrokeStyle(penColor)
 
-    ctx.setLineCap('round');
-    ctx.setLineJoin('round');
-    ctx.moveTo(...this.movePosition);
-    ctx.quadraticCurveTo(...drawPosition);
-    ctx.stroke();
-    ctx.draw(true);
+    ctx.setLineCap('round')
+    ctx.setLineJoin('round')
+    ctx.moveTo(...this.movePosition)
+    ctx.quadraticCurveTo(...drawPosition)
+    ctx.stroke()
+    ctx.draw(true)
 
-    painter.recordPoints(this.movePosition, drawPosition)
+    this.painter.recordPoints(this.movePosition, drawPosition)
 
-    this.prevPosition = [cX, cY];
-    this.movePosition = [(cX + pX) / 2, (cY + pY) / 2];
+    this.prevPosition = [cX, cY]
+    this.movePosition = [(cX + pX) / 2, (cY + pY) / 2]
   },
 
   clearCanvas: function () {
@@ -210,7 +236,7 @@ Page({
       confirmColor: '#e54d42',
       success: function (res) {
         if (res.confirm) {
-          painter.clearDraw(that);
+          that.painter.clearDraw(that);
           that.setData({ isClean: true })
         }
       }
@@ -220,8 +246,8 @@ Page({
   drawBack() {
     const ctx = wx.createCanvasContext('myCanvas');
     ctx.draw();
-    painter.drawBack(this);
-    if (painter.getPoints().length === 0) {
+    this.painter.drawBack(this);
+    if (this.painter.getPoints().length === 0) {
       this.setData({ isClean: true })
     }
   },
@@ -277,7 +303,7 @@ Page({
         }).exec();
     }, 500);
     // 设置画笔
-    const pen = painter.getPenSetting();
+    const pen = this.painter.getPenSetting();
     this.penAlpha = pen.alpha;
     this.setData({
       canDraw: pen.enable,
@@ -326,40 +352,35 @@ Page({
     }
   },
 
-  resetPoints: function () {
-    setTimeout(() => {
-      painter.clearDraw(this);
-      this.setData({ isClean: true })
-    }, 150);
-    if (this.todoList.points && this.todoList.points.length > 0) {
-      setTimeout(() => {
-        this.setData({ isClean: false })
-        painter.setPoints(this.todoList.points);
-      }, 150)
-    }
-  },
-
   onHide: function () {
     // 保存数据
     console.log('hide todolist: ', this.todoList)
     if (this.todoList._id) {
-      let points = painter.getPoints();
+      let points = this.painter.getPoints();
       store.updateListPoints({
         list: this.todoList,
         points,
         success: updateCachedTodoList
       })
     }
-    painter.savePenSetting({
+    this.painter.savePenSetting({
       color: this.data.penColor,
       width: this.data.penWidth,
       enable: this.data.canDraw
     });
   },
 
+  toShare() {
+    app.globalData.pageParam = this.todoList
+    wx.navigateTo({
+      url: './share'
+    })
+  },
+
   onShareAppMessage: function () {
     return {
-      title: '我的清单'
+      title: '待办清单',
+      path: '/page/pen/share?id=' + this.todoList._id,
     }
   }
 })

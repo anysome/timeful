@@ -1,0 +1,14 @@
+<view class="canvas_area">
+  <image class="bgImage" src="{{todoListImage}}" binderror="reloadImage" style="height: {{canvasHeight}}px;"/>
+  <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" style="height: {{canvasHeight}}px;" />
+</view>
+
+<view class="bottom flex justify-around">
+  <view class="text-xsl padding">
+    <text bindtap='close' class="cuIcon-close text-green"></text>
+  </view>
+  <view class="text-xsl padding">
+    <button class="cu-btn cuIcon-share text-green" open-type='share'>
+    </button>
+  </view>
+</view>

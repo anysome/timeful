@@ -4,13 +4,14 @@
 
 <view class="canvas_area">
   <image class="bgImage" src="{{todoListImage}}" binderror="reloadImage" style="height: {{canvasHeight}}px;"/>
-  <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" bindtouchstart="touchStart" bindtouchmove="touchMove" style="height: {{canvasHeight}}px;" />
+  <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll bindtouchstart="touchStart" bindtouchmove="touchMove" style="left: {{currentCanvasId=='myCanvas'?'0':'10000rpx'}}; height: {{canvasHeight}}px;" />
+  <canvas canvas-id="myCanvas2" class="myCanvas" disable-scroll bindtouchstart="touchStart" bindtouchmove="touchMove" style="left: {{currentCanvasId=='myCanvas2'?'0':'10000rpx'}}; height: {{canvasHeight}}px;" />
 </view>
 
 <view id='tabbar' class="cu-bar tabbar bg-white shadow foot bottom">
-  <button class="operation cu-btn lg bg-white" open-type="share">
+  <view class="operation cu-btn lg bg-white" bindtap='toShare'>
     <text class="cuIcon-share lg text-grey"></text>
-  </button>
+  </view>
   <view class="operation"></view>
   <view class="operation cu-btn lg round" style="background: {{canDraw ? penColor : '#ccc'}}" bindtap="toggleDraw" bindlongpress='openSettingPen'>
     <text class="cuIcon-write lg text-white"></text>
