@@ -1,8 +1,8 @@
 import { setPoints, reDraw, getPoints, recordPoints, startTouch, drawBack, clearDraw, getPenSetting, savePenSetting } from "../../utils/paint";
-import { getDefaultTodoList, createTodoList, cacheOriginalImage, getOrignalImage, updateTodoListPoints } from "../../utils/cloud";
+import { createTodoList, cacheOriginalImage, getOrignalImage, updateTodoListPoints } from "../../utils/cloud";
 
 import store from '../../mobx/list-store'
-import { updateCachedTodoList } from '../../utils/cache.js'
+import { updateCachedTodoList, getDefaultTodoList } from '../../utils/cache.js'
 
 const app = getApp();
 
@@ -10,7 +10,7 @@ Page({
   data: {
     tabbarHeight: 42,
     canvasHeight: 0,
-    listImage: '../../images/bg-temp.jpg', // 背景图片，即导入的图片
+    todoListImage: '../../images/bg-temp.jpg',
     canDraw: true,
     isClean: true,
     penColor: '#39b54a',
@@ -38,40 +38,14 @@ Page({
       })
     }
     // 监听图片选择后，创建新记录
-    app.event.on('image:take', data => {
-      const that = this
-      wx.showLoading({
-        title: '加载中...',
-      })
-      store.addList({
-        data: data,
-        success: (record) => {
-          wx.hideLoading()
-          console.log('create new todolist: ', record)
-          updateCachedTodoList(record)
-          that.todoList = record
-          that.resetPoints()
-          that.setupImage(data.image)
-        },
-        fail: err => {
-          wx.hideLoading()
-          wx.showToast({
-            title: '保存数据出错了, 请重试～',
-            icon: 'none'
-          })
-        }
-      })
-    })
+    app.event.on('image:take', this.createList)
     // 监听旧记录选择后的返回处理
-    app.event.on('todolist:open', (list) => {
+    app.event.on('todolist:open', list => {
       this.openList(list)
+      updateCachedTodoList(list)
     })
     // 判断当前记录是否被删除了
-    app.event.on('todolist:remove', (listId) => {
-      if (this.todoList._id === listId) {
-        this.todoList = {}
-      }
-    })
+    app.event.on('todolist:remove', this.removeList)
   },
 
   initCanvasRect(systemInfo) {
@@ -82,18 +56,44 @@ Page({
     this.maxHeight = systemInfo.windowHeight - 100
   },
 
+  createList(images) {
+    wx.showLoading({
+      title: '加载中...',
+    })
+    const that = this
+    store.addList({
+      data: images,
+      success: (record) => {
+        wx.hideLoading()
+        console.log('create new todolist: ', record)
+        updateCachedTodoList(record)
+        that.todoList = record
+        that.resetPoints()
+        that.setupImage(images.image)
+      },
+      fail: err => {
+        wx.hideLoading()
+        wx.showToast({
+          title: '保存数据出错了, 请重试～',
+          icon: 'none'
+        })
+      }
+    })
+  },
+
   openList(list) {
     console.log("will show old list: %o", list)
     this.todoList = list
     this.resetPoints()
-    wx.showLoading({
-      title: '加载中...',
-    })
-    getOrignalImage(list.originFileID, file => {
-      this.setupImage(file);
-    }, () => {
-      wx.hideLoading();
-    })
+    this.setupImage(list.image)
+  },
+
+  removeList(listId) {
+    if (this.todoList._id === listId) {
+      this.setData({
+        todoListImage: '../../images/bg-temp.jpg'
+      })
+    }
   },
 
   onUnload: function () {
@@ -134,7 +134,7 @@ Page({
           height = that.maxHeight;
         }
         that.setData({
-          listImage: res.path,
+          todoListImage: newImage,
           canvasHeight: height
         });
         // 重新绘制笔迹
@@ -247,7 +247,7 @@ Page({
   takePhoto: function () {
     wx.navigateTo({
       url: './photo'
-    });
+    })
   },
 
   onReady: function () {
@@ -273,11 +273,35 @@ Page({
     const list = app.globalData.pageParam
     if (list) {
       this.openList(list)
+      updateCachedTodoList(list)
       app.globalData.pageParam = null
     } else {
-      getDefaultTodoList(list => {
-        if (list._id) {
+      wx.showLoading({
+        title: '加载中...',
+      })
+      getDefaultTodoList({
+        success: list => {
+          wx.hideLoading()
           this.openList(list)
+        },
+        empty: () => {
+          wx.hideLoading()
+          // 操作提示
+          wx.showModal({
+            title: '操作提示',
+            content: '长按画笔按钮可更改画笔颜色',
+            confirmColor: '#39b54a',
+            confirmText: '下一条',
+            success: function (res) {
+              wx.showModal({
+                title: '操作提示',
+                content: '长按撤销按钮可清空笔迹',
+                confirmColor: '#39b54a',
+              })
+            }
+          })
+          // 创建默认的记录
+          // TODO
         }
       })
     }
@@ -288,7 +312,7 @@ Page({
       clearDraw(this);
       this.setData({ isClean: true })
     }, 150);
-    if (this.todoList.points.length > 0) {
+    if (this.todoList.points && this.todoList.points.length > 0) {
       setTimeout(() => {
         this.setData({ isClean: false })
         setPoints(this.todoList.points);
@@ -298,10 +322,14 @@ Page({
 
   onHide: function () {
     // 保存数据
+    console.log('hide todolist: ', this.todoList)
     if (this.todoList._id) {
       let points = getPoints();
-      this.todoList.points = points
-      updateTodoListPoints(this.todoList);
+      store.updateListPoints({
+        list: this.todoList,
+        points,
+        success: updateCachedTodoList
+      })
     }
     savePenSetting({
       color: this.data.penColor,

@@ -3,7 +3,7 @@
 </cu-custom>
 
 <view class="canvas_area">
-  <image class="bgImage" src="{{listImage}}" style="height: {{canvasHeight}}px;"/>
+  <image class="bgImage" src="{{todoListImage}}" style="height: {{canvasHeight}}px;"/>
   <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" bindtouchstart="touchStart" bindtouchmove="touchMove" style="height: {{canvasHeight}}px;" />
 </view>
 

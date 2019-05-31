@@ -49,8 +49,40 @@ function uploadTodoListImage(options) {
   })
 }
 
+function getDefaultTodoList(options) {
+  wx.getStorage({
+    key: 'todoList',
+    success(res) {
+      const list = res.data
+      console.log('get cached default todolist: %o', list)
+      options.success && options.success(list)
+    },
+    fail(err) {
+      console.log('get cached todolist fail.', err)
+      wx.cloud.callFunction({
+        name: 'list-get-last',
+        success: res => {
+          const list = res.result
+          console.log('get last list form cloud', res.result)
+          if (list) {
+            updateCachedTodoList(list)
+            options.success && options.success(list)
+          } else {
+            options.empty && options.empty()
+          }
+        },
+        fail: err => {
+          console.log('get last list form cloud error.', err)
+          options.empty && options.empty()
+        }
+      })
+    }
+  })
+}
+
 export {
   updateCachedImagePath,
   uploadTodoListImage,
-  updateCachedTodoList
+  updateCachedTodoList,
+  getDefaultTodoList
 }

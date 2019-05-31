@@ -66,6 +66,39 @@ const store = observable({
     })
   },
 
+  updateListPoints(options) {
+    const { list, points } = options
+    // update mobx
+    const { list: record, index } = this.getListById(list._id)
+    if (index > -1) {
+      record.points = points
+    }
+    list.points = points
+    const db = wx.cloud.database()
+    db.collection('todoList').doc(list._id).update({
+      data: {
+        points: points
+      },
+      success(res) {
+        console.log("upload points to cloud.", points)
+        options.success && options.success(list)
+      }
+    })
+  },
+
+  getListById(id) {
+    let list, index = -1
+    this.lists.some((record, i) => {
+      const found = record._id === id
+      if (found) {
+        list = record
+        index = i
+      }
+      return found
+    })
+    return { list, index }
+  },
+
   deleteList(options) {
     const record = this.lists[options.index]
     const removedId = record._id
