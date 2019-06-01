@@ -3,10 +3,10 @@
   <view slot="content">拍取纸上待办</view>
 </cu-custom>
 
-<view id='canvasArea' class="canvas_area margin-top-xl" style='height: {{canvasHeight}}px'>
-  <canvas canvas-id="backCanvas" class="myCanvas" disable-scroll hidden />
-  <canvas canvas-id="foreCanvas" class="myCanvas" disable-scroll wx:if="{{hasChoosedImg}}" />
-  <camera binderror="cameraError" class="myCanvas" wx:if="{{isCameraAuth&&!hasChoosedImg}}"></camera>
+<view id='canvasArea' class="canvas_area margin-top-xl">
+  <canvas canvas-id="backCanvas" class="myCanvas" style='height: {{canvasHeight}}px' disable-scroll hidden />
+  <canvas canvas-id="foreCanvas" class="myCanvas" style='height: {{canvasHeight}}px' disable-scroll wx:if="{{hasChoosedImg}}" />
+  <camera binderror="cameraError" class="myCanvas" style='height: {{canvasHeight}}px' wx:if="{{isCameraAuth&&!hasChoosedImg}}"></camera>
 </view>
 
 
