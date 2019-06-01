@@ -41,6 +41,13 @@ Component({
         current: 'https://file.ihugao.com/image/muse/zan-code.jpg'
       })
     },
+    authSetting() {
+      wx.openSetting({
+        success: res => {
+          console.log('new auth setting: ', res)
+        }
+      })
+    },
   },
 
 })

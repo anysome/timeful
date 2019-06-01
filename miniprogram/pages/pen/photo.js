@@ -4,9 +4,11 @@ const app = getApp();
 
 Page({
   data: {
+    isCameraAuth: false,
     hasChoosedImg: false,
+    tabbarHeight: 42,
     canvasWidth: 320,
-    canvasHeight: '80%',
+    canvasHeight: 320,
     grayDegree: 127.5,
   },
 
@@ -15,48 +17,12 @@ Page({
     const sysInfo = app.globalData.systemInfo;
     this.setData({
       canvasWidth: sysInfo.windowWidth,
-      canvasHeight: sysInfo.windowHeight - 100,
+      canvasHeight: sysInfo.windowWidth,
     });
   },
 
-  chooseImg: function () {
-    let that = this;
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['camera'],
-      success: function (res) {
-        wx.getImageInfo({
-          src: res.tempFilePaths[0],
-          success: function (res) {
-            // 获取图片信息，主要为宽高，选择合适的自适应方式（将最大边完整显示）
-            let [height, width] = [that.data.canvasWidth / res.width * res.height, that.data.canvasWidth];
-            if (height > that.data.canvasHeight) {
-              height = that.data.canvasHeight;
-            }
-            const ctx = wx.createCanvasContext('foreCanvas');
-            ctx.drawImage(res.path, 0, 0, width, height);
-            ctx.draw();
-            const backCtx = wx.createCanvasContext('backCanvas');
-            backCtx.drawImage(res.path, 0, 0, width, height);
-            backCtx.draw();
-            that.setData({
-              hasChoosedImg: true,
-              canvasHeight: height,
-            });
-            setTimeout(() => {
-              that.updateGray(that.data.grayDegree);
-            }, 500);
-          }
-        })
-      },
-      fail: function (res) {
-        console.log('Cancel take photo');
-      }
-    })
-  },
-
   updateGray: function (threshold) {
+    console.log('get canvas height', this.data.canvasHeight)
     wx.canvasGetImageData({
       canvasId: 'backCanvas',
       x: 0,
@@ -72,6 +38,7 @@ Page({
           data[i + 1] = gray >= threshold ? 218 : 49;                    // green
           data[i + 2] = gray >= threshold ? 141 : 79;                    // blue
         }
+        console.log('update gray res: %o', res)
         wx.canvasPutImageData({
           canvasId: 'foreCanvas',
           x: 0,
@@ -90,6 +57,34 @@ Page({
     });
   },
 
+  setupImage(filePath) {
+    const that = this
+    wx.getImageInfo({
+      src: filePath,
+      success: function (res) {
+        // 获取图片信息，主要为宽高，选择合适的自适应方式（将最大边完整显示）
+        let [height, width] = [that.data.canvasWidth / res.width * res.height, that.data.canvasWidth];
+        if (height > that.data.canvasHeight) {
+          height = that.data.canvasHeight;
+        }
+        console.log('canvas height changed ? ', that.data.canvasHeight, height)
+        const ctx = wx.createCanvasContext('foreCanvas');
+        ctx.drawImage(res.path, 0, 0, width, height);
+        ctx.draw();
+        const backCtx = wx.createCanvasContext('backCanvas');
+        backCtx.drawImage(res.path, 0, 0, width, height);
+        backCtx.draw();
+        that.setData({
+          hasChoosedImg: true,
+          canvasHeight: height,
+        });
+        setTimeout(() => {
+          that.updateGray(that.data.grayDegree);
+        }, 300);
+      }
+    })
+  },
+
   updateImage: function (e) {
     let threshold = e.detail.value * 255 / 100;
     this.setData({
@@ -98,21 +93,42 @@ Page({
     this.updateGray(threshold);
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
   onReady: function () {
-    this.chooseImg();
     setTimeout(() => {
       const that = this
-      wx.createSelectorQuery().select('#canvasArea')
+      wx.createSelectorQuery().select('#tabbar')
         .boundingClientRect(function (rect) {
-          console.log('canvas rect: %o', rect)
           that.setData({
-            canvasHeight: rect.height
+            tabbarHeight: rect.height
           })
         }).exec();
     }, 500);
+    wx.getSetting({
+      success: (res) => {
+        if (res.authSetting['scope.camera']) {
+          this.setData({
+            isCameraAuth: true
+          })
+        } else {
+          this.setData({
+            isCameraAuth: false
+          })
+          wx.authorize({
+            scope: 'scope.camera',
+            success: () => {
+              this.setData({
+                isCameraAuth: true
+              })
+            },
+            fail: err => {
+              this.setData({
+                isCameraAuth: false
+              })
+            }
+          })
+        }
+      }
+    })
   },
 
   dismiss: function () {
@@ -162,6 +178,36 @@ Page({
         })
       }
     });
-  }
+  },
 
+  cameraError(e) {
+    console.log('camera error.', e.detail)
+  },
+
+  tokePhoto() {
+    if (this.data.isCameraAuth) {
+      const ctx = wx.createCameraContext()
+      ctx.takePhoto({
+        quality: 'normal',
+        success: (res) => {
+          this.setupImage(res.tempImagePath)
+        }
+      })
+    } else {
+      wx.openSetting({
+        success: res => {
+          console.log('new auth setting: ', res)
+          this.setData({
+            isCameraAuth: res.authSetting['scope.camera']
+          })
+        }
+      })
+    }
+  },
+
+  reTake() {
+    this.setData({
+      hasChoosedImg: false
+    })
+  },
 })
