@@ -19,7 +19,6 @@ Component({
 
     showModal: function (e) {
       const currentIndex = e.currentTarget.dataset.index
-      console.log('show modal content by index = ' + currentIndex);
       this.setData({
         currentIndex,
         modalOpened: true
@@ -68,7 +67,6 @@ Component({
     },
 
     openTodoList: function (e) {
-      console.log('open list to edit');
       // 返回当前记录给首页
       const todoList = this.data.lists[this.data.currentIndex]
       if ( getCurrentPages().length > 1) {
@@ -78,8 +76,8 @@ Component({
         });
       } else {
         app.globalData.pageParam = todoList
-        wx.reLaunch({
-          url: 'pages/pen/draw',
+        wx.redirectTo({
+          url: '/pages/pen/draw',
         })
       }
     },
