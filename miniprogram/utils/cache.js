@@ -23,6 +23,15 @@ function updateCachedTodoList(todoList) {
   });
 }
 
+function removeCachedTodoList() {
+  wx.removeStorage({
+    key: 'todoList',
+    success: function(res) {
+      console.log('cached todolist is removed')
+    },
+  })
+}
+
 function updateCachedImagePath(filePath) {
   wx.setStorage({
     key: 'last_image',
@@ -84,5 +93,6 @@ export {
   updateCachedImagePath,
   uploadTodoListImage,
   updateCachedTodoList,
+  removeCachedTodoList,
   getDefaultTodoList
 }
