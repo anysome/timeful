@@ -39,25 +39,25 @@ Component({
         confirmColor: '#e54d42',
         success: function (res) {
           if (res.confirm) {
-            that.doRemoveList();
+            that.hideModal()
+            that.doRemoveList()
           }
         }
       });
     },
 
     doRemoveList: function () {
+      wx.showLoading({
+        title: '删除中...',
+      })
       const that = this
       store.deleteList({
         index: this.data.currentIndex,
         success() {
-          that.setData({
-            modalOpened: false
-          })
+          wx.hideLoading()
         },
         fail() {
-          that.setData({
-            modalOpened: false
-          })
+          wx.hideLoading()
           wx.showToast({
             title: '删除数据失败，请重试',
             icon: 'none'

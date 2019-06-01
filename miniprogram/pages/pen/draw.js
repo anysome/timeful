@@ -1,5 +1,5 @@
 import Painter from '../../utils/painter.js'
-import { updateCachedTodoList, getDefaultTodoList } from '../../utils/cache.js'
+import { updateCachedTodoList, getDefaultTodoList, removeCachedTodoList } from '../../utils/cache.js'
 import store from '../../mobx/list-store'
 
 const app = getApp()
@@ -84,6 +84,7 @@ Page({
   },
 
   openList(list) {
+    this.todoList = list
     console.log("will show old list: %o", list)
     if (this.data.currentCanvasId == 'myCanvas') {
       this.setData({
@@ -108,15 +109,18 @@ Page({
       this.painter = this.painter1
       console.log('change to painter 1')
     }
-    this.todoList = list
     this.setupImage(list.image)
   },
 
   removeList(listId) {
+    console.log('delete list id = ', listId)
     if (this.todoList._id === listId) {
+      this.todoList = {}
       this.setData({
         todoListImage: '../../images/bg-temp.jpg'
       })
+      removeCachedTodoList()
+      console.log('current todolist is removed')
     }
   },
 
@@ -238,7 +242,7 @@ Page({
       confirmColor: '#e54d42',
       success: function (res) {
         if (res.confirm) {
-          that.painter.clearDraw(that);
+          that.painter.clearDraw(that)
           that.setData({ isClean: true })
         }
       }
@@ -338,20 +342,26 @@ Page({
       this.openList(list)
       updateCachedTodoList(list)
       app.globalData.pageParam = null
-    } else {
-      wx.showLoading({
-        title: '加载中...',
-      })
-      getDefaultTodoList({
-        success: list => {
-          wx.hideLoading()
-          this.openList(list)
-        },
-        empty: () => {
-          wx.hideLoading()
-        }
-      })
     }
+  },
+
+  onShow: function() {
+    if (this.todoList._id) {
+      return
+    }
+    console.log('load default todolist')
+    wx.showLoading({
+      title: '加载中...',
+    })
+    getDefaultTodoList({
+      success: list => {
+        wx.hideLoading()
+        this.openList(list)
+      },
+      empty: () => {
+        wx.hideLoading()
+      }
+    })
   },
 
   onHide: function () {

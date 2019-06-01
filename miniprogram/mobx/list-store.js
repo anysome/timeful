@@ -110,7 +110,7 @@ const store = observable({
 
   deleteList(options) {
     const record = this.lists[options.index]
-    const removedId = record._id
+    const removeId = record._id
     app.event.emit('todolist:remove', removeId)
     const that = this
     let lists = this.lists
