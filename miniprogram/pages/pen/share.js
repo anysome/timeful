@@ -16,6 +16,18 @@ Page({
   penAlpha: 0.5,
 
   onLoad: function (options) {
+    // 调整画布
+    if (app.globalData.systemInfo) {
+      this.initCanvasRect(app.globalData.systemInfo)
+    } else {
+      const that = this
+      wx.getSystemInfo({
+        success: function (res) {
+          that.initCanvasRect(res)
+        }
+      })
+    }
+    // 加载数据
     let list = app.globalData.pageParam
     if (list) {
       this.openList(list)
@@ -49,6 +61,14 @@ Page({
     }
   },
 
+  initCanvasRect(systemInfo) {
+    this.canvasWidth = systemInfo.windowWidth
+    this.setData({
+      canvasHeight: systemInfo.canvasWidth + 50
+    })
+    this.maxHeight = systemInfo.windowWidth + 100
+  },
+
   openList(list) {
     console.log("will show old list: %o", list)
     this.todoList = list
@@ -66,6 +86,7 @@ Page({
         if (height > that.maxHeight) {
           height = that.maxHeight
         }
+        console.log('new canvas height:', height)
         that.setData({
           todoListImage: newImage,
           canvasHeight: height

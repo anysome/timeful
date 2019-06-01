@@ -1,5 +1,5 @@
 <view class="canvas_area">
-  <image class="bgImage" src="{{todoListImage}}" binderror="reloadImage" style="height: {{canvasHeight}}px;"/>
+  <image class="myCanvas" src="{{todoListImage}}" binderror="reloadImage" style="height: {{canvasHeight}}px;"/>
   <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" style="height: {{canvasHeight}}px;" />
 </view>
 

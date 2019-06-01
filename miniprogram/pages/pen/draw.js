@@ -28,7 +28,6 @@ Page({
   movePosition: [0, 0], // 当前移动位置
 
   onLoad: function (options) {
-
     this.painter = this.painter1
     // 调整画布
     if (app.globalData.systemInfo) {
@@ -53,7 +52,7 @@ Page({
   },
 
   initCanvasRect(systemInfo) {
-    this.canvasWidth = systemInfo.windowWidth;
+    this.canvasWidth = systemInfo.windowWidth
     this.setData({
       canvasHeight: systemInfo.windowHeight - 100
     })
@@ -250,7 +249,7 @@ Page({
   },
 
   drawBack() {
-    const ctx = wx.createCanvasContext('myCanvas');
+    const ctx = wx.createCanvasContext(this.data.currentCanvasId);
     ctx.draw();
     this.painter.drawBack(this);
     if (this.painter.getPoints().length === 0) {
