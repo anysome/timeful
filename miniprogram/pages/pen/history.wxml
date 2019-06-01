@@ -30,7 +30,8 @@
 
 <view class="cu-modal {{modalOpened?'show':''}}">
   <view class="cu-dialog">
-    <view class="bg-img modal-image" style="background-image: url('{{lists[currentIndex].image}}');">
+    <view class="modal-image bg-blue light" >
+      <image src='{{lists[currentIndex].image}}' mode='aspectFit' lazy-load></image>
       <view class="cu-bar justify-end text-white">
         <view class='action' bindtap='hideModal'>
           <text class='cuIcon-close'></text>
