@@ -1,10 +1,14 @@
+import { uploadTodoListImage } from '../../utils/cache.js'
+
 const app = getApp();
 
 Page({
   data: {
+    isCameraAuth: false,
     hasChoosedImg: false,
-    canvasWidth: 320,
-    canvasHeight: '80%',
+    tabbarHeight: 42,
+    canvasWidth: 640,
+    canvasHeight: 1600, // 坑跌的canvas
     grayDegree: 127.5,
   },
 
@@ -13,49 +17,38 @@ Page({
     const sysInfo = app.globalData.systemInfo;
     this.setData({
       canvasWidth: sysInfo.windowWidth,
-      canvasHeight: sysInfo.windowHeight - 100,
+      canvasHeight: sysInfo.windowWidth + 50,
     });
   },
 
-  chooseImg: function () {
-    let that = this;
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['camera'],
+  setupImage(filePath) {
+    const that = this
+    wx.getImageInfo({
+      src: filePath,
       success: function (res) {
-        wx.getImageInfo({
-          src: res.tempFilePaths[0],
-          success: function (res) {
-            // 获取图片信息，主要为宽高，选择合适的自适应方式（将最大边完整显示）
-            let [height, width] = [that.data.canvasWidth / res.width * res.height, that.data.canvasWidth];
-            if (height > that.data.canvasHeight) {
-              height = that.data.canvasHeight;
-            }
-            const ctx = wx.createCanvasContext('foreCanvas');
-            ctx.drawImage(res.path, 0, 0, width, height);
-            ctx.draw();
-            const backCtx = wx.createCanvasContext('backCanvas');
-            backCtx.drawImage(res.path, 0, 0, width, height);
-            backCtx.draw();
-            that.setData({
-              hasChoosedImg: true,
-              canvasHeight: height,
-            });
-            setTimeout(() => {
-              that.updateGray(that.data.grayDegree);
-            }, 500);
-          }
-        })
-      },
-      fail: function (res) {
-        console.log('Cancel take photo');
+        // 获取图片信息，主要为宽高，选择合适的自适应方式（将最大边完整显示）
+        let [height, width] = [that.data.canvasWidth / res.width * res.height, that.data.canvasWidth];
+        if (height > that.data.canvasHeight) {
+          height = that.data.canvasHeight;
+        }
+        const ctx = wx.createCanvasContext('foreCanvas');
+        ctx.drawImage(res.path, 0, 0, width, height);
+        ctx.draw();
+        const backCtx = wx.createCanvasContext('backCanvas');
+        backCtx.drawImage(res.path, 0, 0, width, height);
+        backCtx.draw();
+        that.setData({
+          hasChoosedImg: true,
+          canvasHeight: height,
+        });
+        setTimeout(() => {
+          that.updateGray(that.data.grayDegree);
+        }, 300);
       }
     })
   },
 
   updateGray: function (threshold) {
-    console.log("threshold = " + threshold);
     wx.canvasGetImageData({
       canvasId: 'backCanvas',
       x: 0,
@@ -67,11 +60,10 @@ Page({
         for (var i = 0; i < data.length; i += 4) {
           // 灰度计算公式
           var gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          // var alpha = data[i + 3];
           data[i] = gray >= threshold ? 250 : 3;                         // red
           data[i + 1] = gray >= threshold ? 218 : 49;                    // green
           data[i + 2] = gray >= threshold ? 141 : 79;                    // blue
-          // data[i + 3] = alpha >= threshold ? 255 : 0;                    // alpha
+          // data[i + 3] // alpha
         }
         wx.canvasPutImageData({
           canvasId: 'foreCanvas',
@@ -81,7 +73,10 @@ Page({
           height: res.height,
           data,
           success(res) {
-            console.log("update image gray");
+            console.log("update image gray")
+          },
+          fail(err) {
+            console.log("update image gray error.", err)
           }
         })
       }
@@ -96,21 +91,44 @@ Page({
     this.updateGray(threshold);
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
   onReady: function () {
-    this.chooseImg();
+    // 调整滑动条位置
     setTimeout(() => {
       const that = this
-      wx.createSelectorQuery().select('#canvasArea')
+      wx.createSelectorQuery().select('#tabbar')
         .boundingClientRect(function (rect) {
-          console.log('canvas rect: %o', rect)
           that.setData({
-            canvasHeight: rect.height
+            tabbarHeight: rect.height
           })
         }).exec();
     }, 500);
+    // 请求授权
+    wx.getSetting({
+      success: (res) => {
+        if (res.authSetting['scope.camera']) {
+          this.setData({
+            isCameraAuth: true
+          })
+        } else {
+          this.setData({
+            isCameraAuth: false
+          })
+          wx.authorize({
+            scope: 'scope.camera',
+            success: () => {
+              this.setData({
+                isCameraAuth: true
+              })
+            },
+            fail: err => {
+              this.setData({
+                isCameraAuth: false
+              })
+            }
+          })
+        }
+      }
+    })
   },
 
   dismiss: function () {
@@ -128,22 +146,68 @@ Page({
     wx.canvasToTempFilePath({
       canvasId: 'foreCanvas',
       success: function (res) {
-        wx.hideLoading();
-        // 转图片成功，返回给首页
-        app.event.emit('newImage', res.tempFilePath);
-        wx.navigateBack({
-          delta: 1
-        });
+        // 上传图片
+        uploadTodoListImage({
+          filePath: res.tempFilePath,
+          success: fileID => {
+            wx.hideLoading()
+            // 转图片成功，返回给首页
+            app.event.emit('image:take', {
+              fileID,
+              image: res.tempFilePath
+            });
+            wx.navigateBack({
+              delta: 1
+            });
+          },
+          fail: err => {
+            wx.hideLoading()
+            wx.showToast({
+              icon: 'none',
+              title: '保存图片出错了，请重试～',
+            })
+          }
+        })
       },
       fail: function (res) {
-        wx.hideLoading();
+        wx.hideLoading()
         // canvas转图片失败
         wx.showToast({
-          icon: 'loading',
-          title: '保存失败',
+          icon: 'none',
+          title: '保存图片出错了，请重试～',
         })
       }
     });
-  }
+  },
 
+  cameraError(e) {
+    console.log('camera error.', e.detail)
+  },
+
+  tokePhoto() {
+    if (this.data.isCameraAuth) {
+      const ctx = wx.createCameraContext()
+      ctx.takePhoto({
+        quality: 'normal',
+        success: (res) => {
+          this.setupImage(res.tempImagePath)
+        }
+      })
+    } else {
+      wx.openSetting({
+        success: res => {
+          console.log('new auth setting: ', res)
+          this.setData({
+            isCameraAuth: res.authSetting['scope.camera']
+          })
+        }
+      })
+    }
+  },
+
+  reTake() {
+    this.setData({
+      hasChoosedImg: false
+    })
+  },
 })

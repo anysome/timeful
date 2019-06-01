@@ -6,19 +6,27 @@
   </view>
 </cu-custom>
 
-<view class="bg-white padding">
-  <view class="grid col-3 grid-square">
-    <view class="bg-img bg-mask grid-image" wx:for="{{lists}}" wx:key style="background-image:url({{item.image}});" data-index='{{index}}' bindtap='showModal'>
-      <view class='padding text-white'>
-        {{filter.formatDateShort(item.date)}}
-      </view>
-      <view class='padding'></view>
-      <view class='padding text-white text-right'>
-        {{filter.formatTimeShort(item.date)}}
+<view class="cu-load padding-top bg-white loading" wx:if="{{lists.length==0&&loading}}"></view>
+
+<scroll-view scroll-y class="scroll-page" bindscrolltolower="loadMore">
+
+  <view class="bg-white padding">
+    <view class="grid col-3 grid-square">
+      <view class="bg-mask image-bg" wx:for="{{lists}}" wx:key data-index='{{index}}' bindtap='showModal'>
+        <image src='{{item.image}}' lazy-load></image>
+        <view class='padding text-white text-lg'>
+          {{filter.formatDate(item.date)}}
+        </view>
+        <view class='time text-white text-sm'>
+          {{filter.formatTimeShort(item.date)}}
+        </view>
       </view>
     </view>
   </view>
-</view>
+
+  <view class="top-bottom-height"></view>
+  
+</scroll-view>
 
 <view class="cu-modal {{modalOpened?'show':''}}">
   <view class="cu-dialog">

@@ -3,14 +3,15 @@
 </cu-custom>
 
 <view class="canvas_area">
-  <image class="bgImage" src="{{listImage}}" style="height: {{canvasHeight}}px;"/>
-  <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" bindtouchstart="touchStart" bindtouchmove="touchMove" style="height: {{canvasHeight}}px;" />
+  <image class="bgImage" src="{{todoListImage}}" binderror="reloadImage" style="height: {{canvasHeight}}px;"/>
+  <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll bindtouchstart="touchStart" bindtouchmove="touchMove" style="left: {{currentCanvasId=='myCanvas'?'0':'10000rpx'}}; height: {{canvasHeight}}px;" />
+  <canvas canvas-id="myCanvas2" class="myCanvas" disable-scroll bindtouchstart="touchStart" bindtouchmove="touchMove" style="left: {{currentCanvasId=='myCanvas2'?'0':'10000rpx'}}; height: {{canvasHeight}}px;" />
 </view>
 
 <view id='tabbar' class="cu-bar tabbar bg-white shadow foot bottom">
-  <button class="operation cu-btn lg bg-white" open-type="share">
+  <view class="operation cu-btn lg bg-white" bindtap='toShare'>
     <text class="cuIcon-share lg text-grey"></text>
-  </button>
+  </view>
   <view class="operation"></view>
   <view class="operation cu-btn lg round" style="background: {{canDraw ? penColor : '#ccc'}}" bindtap="toggleDraw" bindlongpress='openSettingPen'>
     <text class="cuIcon-write lg text-white"></text>
@@ -24,15 +25,19 @@
   </view>
 
   <view class="operation"></view>
-  <view class="operation cu-btn lg bg-white" bindtap='goto' data-page='./photo'>
+  <view class="operation cu-btn lg bg-white" bindtap='takePhoto'>
     <text class="cuIcon-camera lg text-blue"></text>
   </view>
 </view>
 
 <cover-view class='panel bg-gray' style='bottom: {{tabbarHeight}}px' wx:if="{{penSetting}}">
   <cover-view class="panel-box">
-    <cover-view bindtap="selectColor" class="color-spot bg-green" data-color="#39b54a" />
+    <cover-view bindtap="selectColor" class="color-spot bg-pink" data-color="#e03997" />
     <cover-view bindtap="selectColor" class="color-spot bg-orange" data-color="#f37b1d" />
+    <cover-view bindtap="selectColor" class="color-spot bg-olive" data-color="#8dc63f" />
+    <cover-view bindtap="selectColor" class="color-spot bg-cyan" data-color="#1cbbb4" />
+    
+    <cover-view bindtap="selectColor" class="color-spot bg-purple" data-color="#6739b6" />
   </cover-view>
   <cover-view class="panel-box">
     <cover-view class='bg-white btn-width' data-diff='2' bindtap='reduceWidth'>

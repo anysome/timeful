@@ -22,9 +22,12 @@ Page({
       })
     }
   },
-
-  onLoad: function() {
-
-  },
-
+  
+  onShareAppMessage: function () {
+    return {
+      title: '指点你的待办清单',
+      path: '/page/pen/draw',
+      imageUrl: '/images/bg-temp.jpg'
+    }
+  }
 })

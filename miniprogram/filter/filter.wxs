@@ -3,6 +3,17 @@ var formatNumber = function (n) {
   return n[1] ? n : '0' + n
 }
 
+var formatDate = function (val) {
+  if (val) {
+    var myDate = getDate(val)
+    var month = myDate.getMonth() + 1
+    var day = myDate.getDate()
+    return month + '月' + day + '日 '
+  } else {
+    return ''
+  }
+}
+
 var formatDateShort = function (val) {
   if (val) {
     var myDate = getDate(val)
@@ -27,5 +38,6 @@ var formatTimeShort = function (val) {
 
 module.exports = {
   formatDateShort: formatDateShort,
-  formatTimeShort: formatTimeShort
+  formatTimeShort: formatTimeShort,
+  formatDate: formatDate
 }

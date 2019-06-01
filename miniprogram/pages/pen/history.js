@@ -1,4 +1,4 @@
-import { connect, extract } from '../../mobx/mobx-wxapp'
+import { connect } from '../../mobx/mobx-wxapp'
 import store from '../../mobx/list-store'
 
 const app = getApp();
@@ -72,7 +72,7 @@ Component({
       // 返回当前记录给首页
       const todoList = this.data.lists[this.data.currentIndex]
       if ( getCurrentPages().length > 1) {
-        app.event.emit('openList', todoList);
+        app.event.emit('todolist:open', todoList);
         wx.navigateBack({
           delta: 1
         });
@@ -83,6 +83,25 @@ Component({
         })
       }
     },
+
+    loadMore: function() {
+      store.loadLists({
+        success(hasLeft) {
+          if (!hasLeft) {
+            wx.showToast({
+              title: '没有更多记录了',
+              icon: 'none'
+            })
+          }
+        },
+        fail(err) {
+          wx.showToast({
+            title: '出错了，请重试',
+            icon: 'none'
+          })
+        }
+      })
+    }
   },
 
   lifetimes: {

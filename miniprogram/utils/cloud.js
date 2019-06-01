@@ -1,36 +1,5 @@
 const app = getApp();
 
-export const initEnv = () => {
-  if (!app.globalData.openid) {
-    try {
-      const value = wx.getStorageSync('openid')
-      if (value) {
-        app.globalData.openid = value;
-      }
-    } catch (e) {
-      console.log("Can't get local openid", e);
-    }
-  }
-  if (!app.globalData.openid) {
-    wx.cloud.callFunction({
-      name: 'login',
-      data: {},
-      success: res => {
-        app.globalData.openid = res.result.openid;
-        wx.setStorage({
-          key: 'openid',
-          data: res.result.openid
-        });
-        console.log("get openid from cloud");
-      },
-      fail: err => {
-        console.log('[云函数] 获取 openid 失败.', err)
-      }
-    });
-  }
-  console.log("current openid = %s", app.globalData.openid);
-};
-
 export const getDefaultTodoList = (callback) => {
   wx.getStorage({
     key: 'todoList',
