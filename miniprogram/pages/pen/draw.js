@@ -89,6 +89,7 @@ Page({
       this.setData({
         currentCanvasId: 'myCanvas2'
       })
+      // canvas清空不及时的坑
       setTimeout(() => {
         this.painter1.clearDraw(this)
       }, 1500)
@@ -99,6 +100,7 @@ Page({
       this.setData({
         currentCanvasId: 'myCanvas'
       })
+      // canvas清空不及时的坑
       setTimeout(() => {
         this.painter2.clearDraw(this)
       }, 1500)

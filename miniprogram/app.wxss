@@ -4,3 +4,8 @@
 .scroll-page {
   height: 100vh;
 }
+
+.top-bottom-height {
+	min-height: 250rpx;
+	height: calc(250rpx + env(safe-area-inset-bottom));
+}

@@ -83,6 +83,25 @@ Component({
         })
       }
     },
+
+    loadMore: function() {
+      store.loadLists({
+        success(hasLeft) {
+          if (!hasLeft) {
+            wx.showToast({
+              title: '没有更多记录了',
+              icon: 'none'
+            })
+          }
+        },
+        fail(err) {
+          wx.showToast({
+            title: '出错了，请重试',
+            icon: 'none'
+          })
+        }
+      })
+    }
   },
 
   lifetimes: {

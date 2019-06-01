@@ -7,6 +7,7 @@ const store = observable({
   // observable
   lists: [],
   listsLoading: false,
+  listsHasLeft: true,
   currentIndex: -1,
   remoteLoaded: false,
 
@@ -25,24 +26,32 @@ const store = observable({
     }
   },
 
-  loadLists() {
+  loadLists(options) {
+    if (!this.listsHasLeft) {
+      options.success && options.success(false)
+      return
+    }
     this.listsLoading = true
     const that = this
+    const size = 18
     wx.cloud.callFunction({
       name: 'list-history',
       data: {
         offset: this.lists.length,
-        size: 30
+        size: size
       },
       success: res => {
-        console.log('get lists form cloud', res.result)
-        that.lists = that.lists.concat(res.result)
-        that.listsLoading = false
+        const arr = res.result
+        console.log('get lists form cloud', arr)
+        that.lists = that.lists.concat(arr)
         that.remoteLoaded = true
+        that.listsLoading = false
+        that.listsHasLeft = arr.length === size
       },
       fail: err => {
         console.log('[云函数] 获取 lists 失败.', err)
         that.listsLoading = false
+        options.fail && options.fail(err)
       }
     })
   },
