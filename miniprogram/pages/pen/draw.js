@@ -391,7 +391,7 @@ Page({
   onShareAppMessage: function () {
     return {
       title: '待办清单',
-      path: '/page/pen/share?id=' + this.todoList._id,
+      path: '/pages/pen/share?id=' + this.todoList._id,
     }
   }
 })
