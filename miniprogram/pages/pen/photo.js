@@ -210,4 +210,12 @@ Page({
       hasChoosedImg: false
     })
   },
+
+  onShareAppMessage: function () {
+    return {
+      title: '指点你的待办清单',
+      path: '/pages/pen/draw',
+      imageUrl: '/images/bg-temp.jpg'
+    }
+  }
 })
