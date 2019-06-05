@@ -6,14 +6,14 @@ const painter = new Painter('myCanvas')
 Page({
 
   data: {
-    canvasHeight: 0,
-    todoListImage: '../../images/bg-temp.jpg',
+    canvasHeight: 0
   },
 
   todoList: {},
   canvasWidth: 320,
   maxHeight: 480,
   penAlpha: 0.5,
+  tempImage: null,
 
   onLoad: function (options) {
     // 调整画布
@@ -72,7 +72,9 @@ Page({
   openList(list) {
     console.log("will show old list: %o", list)
     this.todoList = list
-    this.setupImage(list.image)
+    if (list.image) {
+      this.setupImage(list.image)
+    }
   },
 
   setupImage(newImage) {
@@ -88,14 +90,31 @@ Page({
         }
         console.log('new canvas height:', height)
         that.setData({
-          todoListImage: newImage,
           canvasHeight: height
         });
+        const ctx = wx.createCanvasContext('myCanvas');
+        ctx.drawImage(res.path, 0, 0, that.canvasWidth, height);
+        ctx.draw();
         // 重新绘制笔迹
         setTimeout(() => {
           painter.setPoints(that.todoList.points)
           painter.reDraw(that)
+        }, 200);
+        // 保存临时图片
+        setTimeout(() => {
+          that.saveTempImage()
         }, 500);
+      }
+    })
+  },
+
+  saveTempImage() {
+    // 调用微信canvas存为图片
+    const that = this
+    wx.canvasToTempFilePath({
+      canvasId: 'myCanvas',
+      success: function (res) {
+        that.tempImage = res.tempFilePath
       }
     })
   },
@@ -113,9 +132,18 @@ Page({
   },
 
   onShareAppMessage: function () {
-    return {
-      title: '待办清单',
-      path: '/pages/pen/share?id=' + this.todoList._id
+    console.log('temp image =', this.tempImage)
+    if (this.tempImage) {
+      return {
+        title: '我的待办清单',
+        imageUrl: this.tempImage,
+        path: '/pages/pen/share?id=' + this.todoList._id
+      }
+    } else {
+      return {
+        title: '我的待办清单',
+        path: '/pages/pen/share?id=' + this.todoList._id
+      }
     }
   }
 })
