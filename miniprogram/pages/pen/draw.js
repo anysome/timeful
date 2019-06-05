@@ -368,10 +368,11 @@ Page({
     console.log('hide todolist: ', this.todoList)
     if (this.todoList._id) {
       let points = this.painter.getPoints();
+      this.todoList.points = points
+      updateCachedTodoList(this.todoList)
       store.updateListPoints({
         list: this.todoList,
-        points,
-        success: updateCachedTodoList
+        points
       })
     }
     this.painter.savePenSetting({

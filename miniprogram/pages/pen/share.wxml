@@ -1,14 +1,19 @@
+<cu-custom bgColor="bg-gradual-blue">
+  <view slot="content">清单预览</view>
+</cu-custom>
 <view class="canvas_area">
-  <image class="myCanvas" src="{{todoListImage}}" binderror="reloadImage" style="height: {{canvasHeight}}px;"/>
   <canvas canvas-id="myCanvas" class="myCanvas" disable-scroll="true" style="height: {{canvasHeight}}px;" />
 </view>
 
-<view class="bottom flex justify-around">
-  <view class="text-xsl padding">
-    <text bindtap='close' class="cuIcon-close text-green"></text>
+<view class="bottom flex flex-direction">
+  <view class='flex justify-around'>
+    <view class="text-xsl padding-xl">
+      <text bindtap='close' class="cuIcon-close text-green"></text>
+    </view>
+    <view class="text-xsl padding-xl">
+      <button class="cu-btn cuIcon-share text-green" open-type='share'>
+      </button>
+    </view>
   </view>
-  <view class="text-xsl padding">
-    <button class="cu-btn cuIcon-share text-green" open-type='share'>
-    </button>
-  </view>
+  
 </view>
