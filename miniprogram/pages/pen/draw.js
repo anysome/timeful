@@ -54,7 +54,7 @@ Page({
   initCanvasRect(systemInfo) {
     this.canvasWidth = systemInfo.windowWidth
     this.setData({
-      canvasHeight: systemInfo.windowHeight - 100
+      canvasHeight: systemInfo.windowWidth
     })
     this.maxHeight = systemInfo.windowHeight - 100
   },
@@ -160,6 +160,7 @@ Page({
         if (height > that.maxHeight) {
           height = that.maxHeight;
         }
+        console.log('set height to:', height)
         that.setData({
           todoListImage: newImage,
           canvasHeight: height,

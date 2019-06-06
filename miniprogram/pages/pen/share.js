@@ -78,6 +78,7 @@ Page({
   },
 
   setupImage(newImage) {
+    this.tempImage = newImage
     let that = this
     wx.getImageInfo({
       src: newImage,
@@ -92,18 +93,21 @@ Page({
         that.setData({
           canvasHeight: height
         });
-        const ctx = wx.createCanvasContext('myCanvas');
-        ctx.drawImage(res.path, 0, 0, that.canvasWidth, height);
-        ctx.draw();
-        // 重新绘制笔迹
-        setTimeout(() => {
-          painter.setPoints(that.todoList.points)
-          painter.reDraw(that)
-        }, 200);
-        // 保存临时图片
-        setTimeout(() => {
-          that.saveTempImage()
-        }, 500);
+        const ctx = wx.createCanvasContext('myCanvas')
+        ctx.drawImage(res.path, 0, 0, that.canvasWidth, height)
+        ctx.draw()
+
+        if (that.todoList.points.length > 0) {
+          // 重新绘制笔迹
+          setTimeout(() => {
+            painter.setPoints(that.todoList.points)
+            painter.reDraw(that)
+            // 生成包含笔迹的临时图片
+            setTimeout(() => {
+              that.saveTempImage()
+            }, 200)
+          }, 200)
+        }
       }
     })
   },
@@ -132,18 +136,10 @@ Page({
   },
 
   onShareAppMessage: function () {
-    console.log('temp image =', this.tempImage)
-    if (this.tempImage) {
-      return {
-        title: '我的待办清单',
-        imageUrl: this.tempImage,
-        path: '/pages/pen/share?id=' + this.todoList._id
-      }
-    } else {
-      return {
-        title: '我的待办清单',
-        path: '/pages/pen/share?id=' + this.todoList._id
-      }
+    return {
+      title: '我的待办清单',
+      imageUrl: this.tempImage,
+      path: '/pages/pen/share?id=' + this.todoList._id
     }
   }
 })
