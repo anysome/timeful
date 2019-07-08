@@ -39,6 +39,13 @@
   <view class='margin-left-xl padding-top-xl text-sm text-gray text-shadow'>THANKS</view>
   <view class="cu-list menu card-menu margin-top-sm margin-bottom-xl shadow-lg radius">
     <view class="cu-item">
+      <view class="content" bindtap="copyLink" data-link="https://github.com/anysome/timeful">
+        <text class="cuIcon-github text-grey"></text>
+        <text class="text-grey">神笔时间源码</text>
+      </view>
+      <text class="cuIcon-like text-yellow"></text>
+    </view>
+    <view class="cu-item">
       <view class="content" bindtap="copyLink" data-link="https://github.com/weilanwl/ColorUI">
         <text class="cuIcon-github text-grey"></text>
         <text class="text-grey">ColorUI组件库</text>
