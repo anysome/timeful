@@ -13,7 +13,7 @@
     <text class="cuIcon-share lg text-grey"></text>
   </view>
   <view class="operation"></view>
-  <view class="operation cu-btn lg round" style="background: {{canDraw ? penColor : '#ccc'}}" bindtap="toggleDraw" bindlongpress='openSettingPen'>
+  <view class="operation cu-btn lg round" style="background: {{canDraw ? penColor : '#ccc'}}" bindtap="openSettingPen" bindlongpress='disableDraw'>
     <text class="cuIcon-write lg text-white"></text>
   </view>
 

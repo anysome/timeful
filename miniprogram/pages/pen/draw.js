@@ -129,14 +129,7 @@ Page({
     app.event.off('todolist:remove')
   },
 
-  toggleDraw: function () {
-    if (this.data.penSetting) {
-      this.setData({
-        penSetting: false,
-        canDraw: true,
-      });
-      return;
-    }
+  disableDraw: function () {
     this.setData({
       canDraw: !this.data.canDraw
     });
@@ -144,7 +137,7 @@ Page({
 
   openSettingPen: function (e) {
     this.setData({
-      penSetting: true,
+      penSetting: !this.data.penSetting,
       canDraw: true,
     });
   },
@@ -320,7 +313,7 @@ Page({
     if (!wx.getStorageSync('tips-already')) {
       wx.showModal({
         title: '操作提示',
-        content: '长按画笔按钮可更改画笔颜色',
+        content: '长按画笔按钮可禁用涂鸦功能',
         confirmColor: '#39b54a',
         confirmText: '下一条',
         success: function (res) {
