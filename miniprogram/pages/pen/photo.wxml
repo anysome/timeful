@@ -4,7 +4,7 @@
 </cu-custom>
 
 <view id='canvasArea' class="canvas_area margin-top-xl">
-  <canvas canvas-id="backCanvas" class="myCanvas" style='height: {{canvasHeight}}px' disable-scroll hidden />
+  <canvas canvas-id="backCanvas" class="myCanvas" style='height: {{canvasHeight}}px' disable-scroll />
   <canvas canvas-id="foreCanvas" class="myCanvas" style='height: {{canvasHeight}}px' disable-scroll wx:if="{{hasChoosedImg}}" />
   <camera binderror="cameraError" class="myCanvas" style='height: {{canvasHeight}}px' wx:if="{{isCameraAuth&&!hasChoosedImg}}"></camera>
 </view>
