@@ -37,8 +37,8 @@ Component({
     },
     showQrcode() {
       wx.previewImage({
-        urls: ['https://file.ihugao.com/image/muse/zan-code.jpg'],
-        current: 'https://file.ihugao.com/image/muse/zan-code.jpg'
+        urls: ['https://file.kinhook.com/image/muse/zan-code.jpg'],
+        current: 'https://file.kinhook.com/image/muse/zan-code.jpg'
       })
     },
     authSetting() {
