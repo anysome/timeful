@@ -10,6 +10,7 @@ Page({
     canvasWidth: 640,
     canvasHeight: 1600, // 坑跌的canvas
     grayDegree: 127.5,
+    useOriginal: false,
   },
 
   onLoad: function (options) {
@@ -41,9 +42,11 @@ Page({
           hasChoosedImg: true,
           canvasHeight: height,
         });
-        setTimeout(() => {
-          that.updateGray(that.data.grayDegree);
-        }, 300);
+        if (!that.data.useOriginal) {
+          setTimeout(() => {
+            that.updateGray(that.data.grayDegree);
+          }, 300);
+        }
       }
     })
   },
@@ -81,6 +84,45 @@ Page({
         })
       }
     });
+  },
+
+  resetImage: function () {
+    wx.canvasGetImageData({
+      canvasId: 'backCanvas',
+      x: 0,
+      y: 0,
+      width: this.data.canvasWidth,
+      height: this.data.canvasHeight,
+      success(res) {
+        wx.canvasPutImageData({
+          canvasId: 'foreCanvas',
+          x: 0,
+          y: 0,
+          width: res.width,
+          height: res.height,
+          data: res.data,
+          success(res) {
+            console.log("reset image")
+          },
+          fail(err) {
+            console.log("reset image error.", err)
+          }
+        })
+      }
+    });
+  },
+
+  toggleFilter: function(e) {
+    console.log('toggle switch')
+    console.log(e.detail.value)
+    this.setData({
+      useOriginal: !e.detail.value,
+    });
+    if (this.data.useOriginal) {
+      this.resetImage();
+    } else {
+      this.updateGray(this.data.grayDegree);
+    }
   },
 
   updateImage: function (e) {
