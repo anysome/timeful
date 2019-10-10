@@ -12,10 +12,18 @@
   position: absolute;
 }
 
+switch {
+  left: 10rpx;
+}
 slider {
+  width: 70%;
+  padding-left: 0;
+  padding-right: 20rpx;
+}
+.toolbar {
+  width: 100%;
   position: fixed;
   bottom: 42rpx;
-  width: 80%;
   padding: 20rpx;
 }
 
